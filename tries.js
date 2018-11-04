@@ -60,30 +60,4 @@ Trie.prototype.search = function(key) {
 
 }
 
-Trie.prototype.remove = function(key) {
-  var d = this.search(key);
-  if (d > -1) {
-    removeH(this.head, key, d);
-  }
-}
-
-function removeH(node, key, depth) {
-  if (depth === 0 && Object.keys(node.children).length === 0) {
-    return true;
-  }
-
-  var curChar = key.slice(0, 1);
-
-  if (removeH(node.children[curChar], key.slice(1), depth - 1)) {
-    delete node.children[curChar];
-    if (Object.keys(node.children).length === 0) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
 module.exports = Trie;

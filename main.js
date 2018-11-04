@@ -1,15 +1,27 @@
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const rl = require('readline');
+
 const Trie = require('./tries');
+const i = rl.createInterface({input: process.stdin, output: process.stdout, terminal: true});
 
 const trie = new Trie();
 
-trie.add('bear');
-trie.add('bell');
-trie.add('bid');
-trie.add('bull');
-trie.add('buy');
+fs.readFileAsync('companies.dat', 'utf-8').then(data => {
+  const companies = data.split('\n');
+  const companiesAndNicknames = companies.map((company) => {
+    return company.split('\t');
+  })
+  console.log(companiesAndNicknames);
 
-trie.add('sell');
-trie.add('stock');
-trie.add('stop');
+  i.question('Enter a news article\n', newsArticle => {
+    console.log('you entered', newsArticle);
+    end();
+  });
+});
 
-console.log(trie);
+function end() {
+  console.log('exiting...');
+  i.close();
+  process.stdin.destroy();
+}
