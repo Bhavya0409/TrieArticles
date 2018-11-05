@@ -2,7 +2,7 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const rl = require('readline');
 
-const Trie = require('./newTries');
+const Trie = require('./tries');
 const i = rl.createInterface({input: process.stdin, output: process.stdout, terminal: true});
 
 const trie = new Trie();
@@ -14,11 +14,21 @@ fs.readFileAsync('companies.dat', 'utf-8').then(data => {
 	})
 	console.log(companiesAndNicknames);
 
-	i.question('Enter a news article\n', newsArticle => {
-		console.log('you entered', newsArticle);
-		const words = newsArticle.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-		end();
+	companiesAndNicknames.map((pseudonyms, id) => {
+		pseudonyms.map(pseudonym => {
+			trie.add(pseudonym, id);
+		})
 	});
+
+	console.log('HERE', trie.head.children);
+
+	end();
+
+	// i.question('Enter a news article\n', newsArticle => {
+	// 	console.log('you entered', newsArticle);
+	// 	const words = newsArticle.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+	// 	end();
+	// });
 });
 
 function end() {

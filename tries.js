@@ -8,7 +8,7 @@ function Trie() {
 /**
  * Function to add a new word to the Trie
  */
-Trie.prototype.add = function(key) {
+Trie.prototype.add = function(key, companyId) {
 
 	// Remove all spaces in word when adding
 	key = key.trim().replace(/ /g, '');
@@ -39,6 +39,7 @@ Trie.prototype.add = function(key) {
 	while (curChar.length > 0) {
 		newNode = {
 			key: curChar,
+			companyId,
 			endOfWord: key.length === 0,
 			children: {}
 		}
