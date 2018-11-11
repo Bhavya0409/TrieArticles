@@ -71,7 +71,11 @@ Trie.prototype.search = function(key) {
   // Return TRUE if we are the end of the string (i.e. all the characters were found in the Trie tree)
   // AND if this is the end of the word
   if (curChar.length === 0 && curNode.endOfWord) {
-    successfulTries[word] = 1;
+    let match = 0;
+    successfulTries[word] = match++;
+    if (successfulTries.hasOwnProperty(word)) {
+      successfulTries[word] = match++;
+    }
     return successfulTries;
   }
 };

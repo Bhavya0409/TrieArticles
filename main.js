@@ -50,7 +50,6 @@ function end() {
   process.stdin.destroy();
 }
 
-
 //Function to calculate word count
 function calculateWordCount(article) {
   if (article) {
@@ -70,7 +69,7 @@ function calcStats(successfuls, words) {
   let stats = {}; //object containing stats of each company
   let arr = []; //array to hold all companies stats
   let hitCount = 0; //hit count per company name
-  let number = 0; //temp number variable -dont worry about this 
+  let number = 0; //temp number variable -dont worry about this
   let percentage = ""; //percentage template string thingy
 
   //traverse through the object of successful tries
@@ -114,11 +113,19 @@ function table(arr, count) {
     console.log(arr[item]); // Will display contents of the object inside the array
   }
 
-  //do total stats in a way where we can get calculations of total hits and percentage of total hits vs. total words
+  //TODO: dynamically add these numbers from whatever DS we use
+  statsTable.push(
+    ["Apple Inc", "HITCOUNT", "RELEVANCE"],
+    ["Microsoft", "HITCOUNT", "RELEVANCE"],
+    ["Verizon Wireless", "HITCOUNT", "RELEVANCE"]
+  );
+
+  //TODO: total stats in a way where we can get calculations of total hits and percentage of total hits vs. total words
   totalStats.push(["Total", 12, "10%"]);
+  //dont need to change anything here
   wordCountTable.push(["Total Words:", count]);
 
-  //   console.log(statsTable.toString());
+  console.log(statsTable.toString());
   console.log(totalStats.toString());
   console.log(wordCountTable.toString());
 }
