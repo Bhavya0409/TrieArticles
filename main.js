@@ -32,10 +32,11 @@ fs.readFileAsync("companies.dat", "utf-8").then(data => {
     if (line === ".") {
       // analysis
       //console.log("news article:", newsArticle);
-      let hits = trie.search(newsArticle);
-      let wordCount = calculateWordCount(newsArticle);
-      let stats = calcStats(hits, wordCount);
-      let whatever = table(stats, wordCount);
+      let hits = getHitCount(newsArticle);
+      console.log(hits);
+      // let wordCount = calculateWordCount(newsArticle);
+      // let stats = calcStats(hits, wordCount);
+      // let whatever = table(stats, wordCount);
       end();
     } else {
       newsArticle += line;
@@ -50,12 +51,26 @@ function end() {
   process.stdin.destroy();
 }
 
+function getHitCount(article) {
+	const words = article.split(' ');
+	const matches = {};
+	words.forEach(word => {
+		const companyId = trie.search(word);
+		if (!isNaN(companyId)) {
+			// if company is found, set that in matches with key = companyId and value = the current value (or 0) plus 1
+			matches[companyId] = (matches[companyId] || 0) + 1;
+		}
+	});
+
+	return matches;
+}
+
 //Function to calculate word count
 function calculateWordCount(article) {
   if (article) {
     article = article.replace(/(and|the|but|an|or|a)/g, "");
     article = article.replace(
-      /(~|`|!|@|#|$|%|^|&|\*|\(|\)|{|}|\[|\]|;|:|\"|'|<|,|\.|>|\?|\/|\\|\||-|_|\+|=)/g,
+      /(~|`|!|@|#|$|%|^|&|\*|\(|\)|{|}|\[|]|;|:|"|'|<|,|\.|>|\?|\/|\\|\||-|_|\+|=)/g,
       ""
     );
     article = article.split(" ");

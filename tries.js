@@ -11,6 +11,8 @@ function Trie() {
 Trie.prototype.add = function(key, companyId) {
   // Remove all spaces in word when adding
   key = key.trim().replace(/ /g, "");
+  // Remove all punctuation when adding
+  key = key.trim().replace(/(~|`|!|@|#|$|%|^|&|\*|\(|\)|{|}|\[|]|;|:|"|'|<|,|\.|>|\?|\/|\\|\||-|_|\+|=)/g, "");
 
   // curNode will be used to traverse trie;
   // newNode is the new node that will be created (if needed)
@@ -55,12 +57,10 @@ Trie.prototype.add = function(key, companyId) {
  * Search for a word in the Tries
  */
 Trie.prototype.search = function(key) {
-  let successfulTries = {};
-  let word = key;
   let curNode = this.head;
-  let curChar = key.slice(0, 1); // ''
+  let curChar = key.slice(0, 1);
 
-  key = key.slice(1); // ''
+  key = key.slice(1);
 
   while (curNode.children[curChar] !== undefined && curChar.length > 0) {
     curNode = curNode.children[curChar];
@@ -70,14 +70,11 @@ Trie.prototype.search = function(key) {
 
   // Return TRUE if we are the end of the string (i.e. all the characters were found in the Trie tree)
   // AND if this is the end of the word
-  if (curChar.length === 0 && curNode.endOfWord) {
-    let match = 0;
-    successfulTries[word] = match++;
-    if (successfulTries.hasOwnProperty(word)) {
-      successfulTries[word] = match++;
+    if (curChar.length === 0 && curNode.endOfWord) {
+      return curNode.companyId;
+    } else {
+      return undefined;
     }
-    return successfulTries;
-  }
 };
 
 module.exports = Trie;
