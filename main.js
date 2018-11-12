@@ -17,8 +17,6 @@ const i = rl.createInterface({
 const trie = new Trie();
 let newsArticle = "";
 
-//TODO use async await
-
 async function start() {
 	const data = await fs.readFileAsync("companies.dat", "utf-8");
 
