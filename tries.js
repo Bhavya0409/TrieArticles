@@ -61,6 +61,7 @@ Trie.prototype.add = function(key, companyId) {
  * Search for a word in the Tries
  */
 Trie.prototype.search = function(key, useLastNode) {
+  let self = this;
   let curNode;
   if (useLastNode) {
     curNode = lastNode;
@@ -70,12 +71,13 @@ Trie.prototype.search = function(key, useLastNode) {
   }
   let curChar = key.slice(0, 1);
 
-  key = key.slice(1);
+  let thisKey = key;
+  thisKey = thisKey.slice(1);
 
   while (curNode.children[curChar] !== undefined && curChar.length > 0) {
     curNode = curNode.children[curChar];
-    curChar = key.slice(0, 1);
-    key = key.slice(1);
+    curChar = thisKey.slice(0, 1);
+	  thisKey = thisKey.slice(1);
   }
 
   // Return TRUE if we are the end of the string (i.e. all the characters were found in the Trie tree)
@@ -97,9 +99,14 @@ Trie.prototype.search = function(key, useLastNode) {
         type: NOT_COMPLETE_WORD_FOUND
       }
     } else {
-      return {
-        type: WORD_NOT_FOUND
-      };
+    	// If we traversed through the remainder of a node and it didn't return a match, search through base of trie instead
+    	if (useLastNode) {
+    		return self.search(key);
+	    } else {
+		    return {
+			    type: WORD_NOT_FOUND
+		    };
+	    }
     }
 };
 
