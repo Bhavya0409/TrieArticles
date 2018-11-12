@@ -77,7 +77,7 @@ Trie.prototype.search = function(key, useLastNode) {
   while (curNode.children[curChar] !== undefined && curChar.length > 0) {
     curNode = curNode.children[curChar];
     curChar = thisKey.slice(0, 1);
-	  thisKey = thisKey.slice(1);
+	thisKey = thisKey.slice(1);
   }
 
   // Return TRUE if we are the end of the string (i.e. all the characters were found in the Trie tree)
