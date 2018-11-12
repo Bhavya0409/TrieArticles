@@ -47,7 +47,6 @@ fs.readFileAsync("companies.dat", "utf-8").then(data => {
 });
 
 function end() {
-  console.log("exiting...");
   i.close();
   process.stdin.destroy();
 }
@@ -82,12 +81,14 @@ function getTableInformation(article) {
 //function to calculate important statistics
 function calcStats(successfuls, words) {
   let stats = {}; //object containing stats of each company
+  let totalHitCount = 0;
 
   //traverse through the object of successful tries
   //get our company name, hit count, calculate percentage
   for (let companyId in successfuls) {
     if (successfuls.hasOwnProperty(companyId)) {
       let hitCount = successfuls[companyId];
+      totalHitCount += hitCount;
       const number = (hitCount / words) * 100;
       const relevance = `${number}%`;
       stats[companyId] = {
@@ -96,11 +97,13 @@ function calcStats(successfuls, words) {
       }
     }
   }
+  stats['totalRelevance'] = `${(totalHitCount / words) * 100}%`;
+  stats['totalHitCount'] = totalHitCount;
   return stats;
 }
 
 //function to turn our values and format it into a nice table format
-async function table(matches, count) {
+async function table(stats, count) {
   //create headings for table professor wants
   const statsTable = new Table({
     head: ["Company", "Hitcount", "Relevance"],
@@ -124,23 +127,18 @@ async function table(matches, count) {
   });
 
   primaryCompanyNames.forEach((primaryCompanyName, id) => {
-  	const companyInformation = matches[`${id}`];
+  	const companyInformation = stats[`${id}`];
   	statsTable.push([
   		primaryCompanyName,
-		companyInformation ? companyInformation.relevance : '0%',
-		companyInformation ? companyInformation.hitCount : '0%']);
+		companyInformation ? companyInformation.hitCount : '0',
+		companyInformation ? companyInformation.relevance : '0%']);
   });
+  totalStats.push(["Total", stats.totalHitCount, stats.totalRelevance]);
+  wordCountTable.push(["Total Words:", count]);
 
-	console.log(statsTable.toString());
-  //
-  // //TODO: total stats in a way where we can get calculations of total hits and percentage of total hits vs. total words
-  // totalStats.push(["Total", 12, "10%"]);
-  // //dont need to change anything here
-  // wordCountTable.push(["Total Words:", count]);
-  //
-  // console.log(statsTable.toString());
-  // console.log(totalStats.toString());
-  // console.log(wordCountTable.toString());
+  console.log(statsTable.toString());
+  console.log(totalStats.toString());
+  console.log(wordCountTable.toString());
 }
 /*
 	Bibliography:
