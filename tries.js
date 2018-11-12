@@ -1,9 +1,13 @@
+const {WORD_FOUND, NOT_COMPLETE_WORD_FOUND, WORD_NOT_FOUND} = require('./constants');
+
 function Trie() {
   this.head = {
     key: "",
     children: {}
   };
 }
+
+let lastNode;
 
 /**
  * Function to add a new word to the Trie
@@ -56,8 +60,14 @@ Trie.prototype.add = function(key, companyId) {
 /**
  * Search for a word in the Tries
  */
-Trie.prototype.search = function(key) {
-  let curNode = this.head;
+Trie.prototype.search = function(key, useLastNode) {
+  let curNode;
+  if (useLastNode) {
+    curNode = lastNode;
+  } else {
+    lastNode = undefined;
+    curNode = this.head;
+  }
   let curChar = key.slice(0, 1);
 
   key = key.slice(1);
@@ -71,9 +81,25 @@ Trie.prototype.search = function(key) {
   // Return TRUE if we are the end of the string (i.e. all the characters were found in the Trie tree)
   // AND if this is the end of the word
     if (curChar.length === 0 && curNode.endOfWord) {
-      return curNode.companyId;
+      // If we have gone through the entire word, AND the current node has endOfWord = true, then the word is found
+      return {
+        type: WORD_FOUND,
+        companyId: curNode.companyId
+      };
+    } else if (curChar.length === 0 && !curNode.endOfWord && curNode.children !== undefined) {
+      // If we have gone through the entire word
+      // AND it's not the end of the word
+      // BUT the current node has more children,
+      // that means that it is not the end of the word, but the next word could be added on to this node.
+      // Therefore, the next word should continue where this left off.
+      lastNode = curNode;
+      return {
+        type: NOT_COMPLETE_WORD_FOUND
+      }
     } else {
-      return undefined;
+      return {
+        type: WORD_NOT_FOUND
+      };
     }
 };
 

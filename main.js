@@ -10,9 +10,9 @@ const i = rl.createInterface({
   terminal: true,
   prompt: "News Article >"
 });
-let companies = [];
-const trie = new Trie();
+const {WORD_FOUND, NOT_COMPLETE_WORD_FOUND} = require('./constants');
 
+const trie = new Trie();
 let newsArticle = "";
 
 fs.readFileAsync("companies.dat", "utf-8").then(data => {
@@ -54,11 +54,17 @@ function end() {
 function getHitCount(article) {
 	const words = article.split(' ');
 	const matches = {};
+	let continueFromLastWord;
 	words.forEach(word => {
-		const companyId = trie.search(word);
-		if (!isNaN(companyId)) {
-			// if company is found, set that in matches with key = companyId and value = the current value (or 0) plus 1
-			matches[companyId] = (matches[companyId] || 0) + 1;
+		// TODO stuff for cases like 'Test Test Company'
+		const {type, companyId} = trie.search(word, continueFromLastWord);
+		continueFromLastWord = false;
+		if (type === WORD_FOUND) {
+			// If the word is found, add it to matches
+            matches[companyId] = (matches[companyId] || 0) + 1;
+		} else if (type === NOT_COMPLETE_WORD_FOUND) {
+			// If the word is not found, hold the word and continue searching the trie at that point for the word
+			continueFromLastWord = true;
 		}
 	});
 
