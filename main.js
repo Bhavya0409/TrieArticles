@@ -62,7 +62,6 @@ function getTableInformation(article) {
 		if (!['a', 'an', 'the', 'and', 'or', 'but'].includes(word)) {
 			totalWords++;
 		}
-		// TODO stuff for cases like 'Test Test Company'
 		const {type, companyId} = trie.search(word, continueFromLastWord);
 		continueFromLastWord = false;
 		if (type === WORD_FOUND) {
