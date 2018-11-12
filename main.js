@@ -15,6 +15,7 @@ const {WORD_FOUND, NOT_COMPLETE_WORD_FOUND} = require('./constants');
 const trie = new Trie();
 let newsArticle = "";
 
+//TODO use async await
 fs.readFileAsync("companies.dat", "utf-8").then(data => {
   const companies = data.split("\n");
   const companiesAndNicknames = companies.map(company => {
@@ -32,11 +33,11 @@ fs.readFileAsync("companies.dat", "utf-8").then(data => {
     if (line === ".") {
       // analysis
       //console.log("news article:", newsArticle);
-      let hits = getHitCount(newsArticle);
-      console.log(hits);
-      // let wordCount = calculateWordCount(newsArticle);
-      // let stats = calcStats(hits, wordCount);
-      // let whatever = table(stats, wordCount);
+      let {matches, totalWords} = getTableInformation(newsArticle);
+      // console.log('matches', matches);
+      // console.log('totalWords', totalWords);
+      let stats = calcStats(matches, totalWords);
+      let whatever = table(stats, totalWords);
       end();
     } else {
       newsArticle += line;
@@ -51,11 +52,15 @@ function end() {
   process.stdin.destroy();
 }
 
-function getHitCount(article) {
+function getTableInformation(article) {
 	const words = article.split(' ');
 	const matches = {};
 	let continueFromLastWord;
+	let totalWords = 0;
 	words.forEach(word => {
+		if (!['a', 'an', 'the', 'and', 'or', 'but'].includes(word)) {
+			totalWords++;
+		}
 		// TODO stuff for cases like 'Test Test Company'
 		const {type, companyId} = trie.search(word, continueFromLastWord);
 		continueFromLastWord = false;
@@ -68,48 +73,34 @@ function getHitCount(article) {
 		}
 	});
 
-	return matches;
-}
-
-//Function to calculate word count
-function calculateWordCount(article) {
-  if (article) {
-    article = article.replace(/(and|the|but|an|or|a)/g, "");
-    article = article.replace(
-      /(~|`|!|@|#|$|%|^|&|\*|\(|\)|{|}|\[|]|;|:|"|'|<|,|\.|>|\?|\/|\\|\||-|_|\+|=)/g,
-      ""
-    );
-    article = article.split(" ");
-    article = article.filter(word => word != "");
-    return article.length;
-  }
+	return {
+		totalWords,
+		matches
+	};
 }
 
 //function to calculate important statistics
 function calcStats(successfuls, words) {
   let stats = {}; //object containing stats of each company
-  let arr = []; //array to hold all companies stats
-  let hitCount = 0; //hit count per company name
-  let number = 0; //temp number variable -dont worry about this
-  let percentage = ""; //percentage template string thingy
 
   //traverse through the object of successful tries
   //get our company name, hit count, calculate percentage
-  for (let company in successfuls) {
-    if (successfuls.hasOwnProperty(company)) {
-      hitCount = successfuls[company];
-      number = (hitCount / words) * 100;
-      percentage = `${number}%`;
-      stats[company] = percentage;
-      stats["hit count"] = hitCount;
-      arr.push(stats);
+  for (let companyId in successfuls) {
+    if (successfuls.hasOwnProperty(companyId)) {
+      let hitCount = successfuls[companyId];
+      const number = (hitCount / words) * 100;
+      const relevance = `${number}%`;
+      stats[companyId] = {
+      	relevance,
+		hitCount
+      }
     }
   }
-  return arr;
+  return stats;
 }
 
 //function to turn our values and format it into a nice table format
-function table(arr, count) {
+async function table(matches, count) {
   //create headings for table professor wants
   const statsTable = new Table({
     head: ["Company", "Hitcount", "Relevance"],
@@ -123,32 +114,33 @@ function table(arr, count) {
 
   //table for total words in article
   const wordCountTable = new Table({
-    colWidths: [45, 46]
+    colWidths: [45, 45]
   });
 
-  let company;
+  const companiesString = await fs.readFileAsync("companies.dat", "utf-8");
+  const companies = companiesString.split('\n');
+  const primaryCompanyNames = companies.map(company => {
+  	return company.split("\t")[0];
+  });
 
-  //figure out how to get company names, hitcount, and relevance from array of objects
-  //then populate the table dynamically
-  for (let item in arr) {
-    console.log(arr[item]); // Will display contents of the object inside the array
-  }
+  primaryCompanyNames.forEach((primaryCompanyName, id) => {
+  	const companyInformation = matches[`${id}`];
+  	statsTable.push([
+  		primaryCompanyName,
+		companyInformation ? companyInformation.relevance : '0%',
+		companyInformation ? companyInformation.hitCount : '0%']);
+  });
 
-  //TODO: dynamically add these numbers from whatever DS we use
-  statsTable.push(
-    ["Apple Inc", "HITCOUNT", "RELEVANCE"],
-    ["Microsoft", "HITCOUNT", "RELEVANCE"],
-    ["Verizon Wireless", "HITCOUNT", "RELEVANCE"]
-  );
-
-  //TODO: total stats in a way where we can get calculations of total hits and percentage of total hits vs. total words
-  totalStats.push(["Total", 12, "10%"]);
-  //dont need to change anything here
-  wordCountTable.push(["Total Words:", count]);
-
-  console.log(statsTable.toString());
-  console.log(totalStats.toString());
-  console.log(wordCountTable.toString());
+	console.log(statsTable.toString());
+  //
+  // //TODO: total stats in a way where we can get calculations of total hits and percentage of total hits vs. total words
+  // totalStats.push(["Total", 12, "10%"]);
+  // //dont need to change anything here
+  // wordCountTable.push(["Total Words:", count]);
+  //
+  // console.log(statsTable.toString());
+  // console.log(totalStats.toString());
+  // console.log(wordCountTable.toString());
 }
 /*
 	Bibliography:
